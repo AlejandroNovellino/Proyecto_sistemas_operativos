@@ -1,6 +1,5 @@
 import sys
 
-
 # get the buffer size
 try:
     buffer_size = int(sys.argv[1])
