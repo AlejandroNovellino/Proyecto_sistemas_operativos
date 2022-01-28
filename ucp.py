@@ -1,3 +1,4 @@
+import os
 import sys
 
 # get the buffer size
@@ -22,16 +23,19 @@ try:
 except:
     print("No se introdujo un archivo a crear")
     exit()
-# open the file
+# the copy operation
 try:
-    with open(from_file_name, buffering=buffer_size) as file:
-        info_to_save = file.read()
+    # open the file to read
+    with os.fdopen(os.open(from_file_name, os.O_RDWR | os.O_CREAT), mode='r', buffering=buffer_size) as from_file:
         try:
-            with  open(to_file_name, "w", buffering=buffer_size) as new_file:
-                new_file.write(info_to_save)
-            print("El archivo se ha copiado exitosamente")
+            # create or open the file to save the data
+            with os.fdopen(os.open(to_file_name, os.O_RDWR | os.O_CREAT), mode='w', buffering=buffer_size) as to_file:
+                while True:
+                    data = from_file.read(buffer_size)
+                    if not data:
+                        break
+                    to_file.write(data)
         except:
-            print("No se pudo crear el nuevo un archivo")
-            exit()
+            print("No se pudo crear el archivo destino")
 except:
-    print("No existe el archivo")
+    print("No existe el archivo fuente")

@@ -1,56 +1,50 @@
-#from asyncio.windows_events import NULL
-#from email import message
-import sys
-import os
+import multiprocessing
 import signal
+import threading
 import time
-
-def write_to_pipe():
-    print("---- Mensaje enviado")
-    text = b"SIGALRM recibido"
-    os.write(w, text)
-
-def read_from_pipe():
-    print("**** Mensaje se esta leyendo")
-    pipe_message_r = os.fdopen(r)
-    print("**** Mensaje leido: "+pipe_message_r.read())
 
 # defining the signal handler
 def pipe_handler(signum, frame):
     # write to the pipe
-    write_to_pipe()
+    queuePipe.put("SIGALRM recibida")
 
-# create the pipe for comunication 
-# between the two child process
-r, w = os.pipe()
-pipe1_closed, pipe2_closed = False, False
+# global variable for the read process
+queuePipe = multiprocessing.Queue()
 
-# create the first child process
-pid_1 = os.fork()
-# create the second child process
-pid_2 = os.fork() if (pid_1 > 0) else None
-print(os.getpid())
-if(pid_1 == 0):
-    print("Hello from the first child, id:"+str(os.getpid()))
-    signal.signal(signal.SIGALRM, pipe_handler)
-    signal.alarm(1)
-    ####
-    os.close(r)
-    #signal.signal(signal.SIGALRM, pipe_handler)
-    signal.alarm(1)
+#### set the alarm
+signal.signal(signal.SIGALRM, pipe_handler)
 
-else:
-    if(pid_2 == 0):
-        print("Hello from the second child, id: "+str(os.getpid()))    
-        time.sleep(1.1)
-        read_from_pipe()
-        ####
-        time.sleep(1.1)   
-        os.close(w)
-        read_from_pipe()
+def child1_function(queuePipe):
+    # write to the pipe 10 times
+    for i in range(10):
+        # generate the alarm to write
+        signal.alarm(2)
+        # wait for the signal to happend
+        time.sleep(2)
 
-    else: 
-        print("Hello from the father, id: "+str(os.getpid()))
+def child2_function(queuePipe):
+    # read from the pipe 10 times
+    for j in range(10):
+        # wait for the first child to write
+        time.sleep(2)
+        # print the content in the pipe
+        print(queuePipe.get())
+        ## end 
 
-time.sleep(4)
-sys.exit()
+def main():
+    # child processes
+    child1 = threading.Thread(target=child1_function, args=(queuePipe,))
+    child2 = threading.Thread(target=child2_function, args=(queuePipe,))
+
+    # start the child processes
+    child1.start()
+    child2.start()
+
+    # wait for them
+    child1.join()
+    child2.join()
+
+    # print
+    print("Proceso padre finalizado")
+
+main()
