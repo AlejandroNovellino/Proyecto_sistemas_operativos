@@ -6,10 +6,10 @@ try:
     buffer_size = int(sys.argv[1])
     # verify the buffer size is valid
     if(buffer_size<1 or buffer_size>16384):
-        print("Tamano de buffer no es valido, debe pertenecer al intervalo [1, 16384]")
+        print("Tamaño de buffer no es valido, debe pertenecer al intervalo [1, 16384]")
         exit()
 except:
-    print("No se introdujo un tamano de buffer")
+    print("No se introdujo un tamaño de buffer")
     exit()
 # get the file to copy
 try:
