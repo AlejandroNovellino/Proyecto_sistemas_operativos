@@ -1,6 +1,8 @@
 import os
 import sys
 
+# program arguments: buffer_size from_file destiny  _file
+
 # get the buffer size
 try:
     buffer_size = int(sys.argv[1])
@@ -26,7 +28,7 @@ except:
 # the copy operation
 try:
     # open the file to read
-    with os.fdopen(os.open(from_file_name, os.O_RDWR | os.O_CREAT), mode='r', buffering=buffer_size) as from_file:
+    with os.fdopen(os.open(from_file_name, os.O_RDONLY), mode='r', buffering=buffer_size) as from_file:
         try:
             # create or open the file to save the data
             with os.fdopen(os.open(to_file_name, os.O_RDWR | os.O_CREAT), mode='w', buffering=buffer_size) as to_file:
